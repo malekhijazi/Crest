@@ -53,6 +53,12 @@ final class BrowserChromeState {
         commandPaletteMode != nil
     }
 
+    /// Whether the palette is open to edit the shown tab's address.
+    var isEditingLocation: Bool {
+        guard case .editLocation = commandPaletteMode else { return false }
+        return true
+    }
+
     // MARK: - Initializers
 
     init(
