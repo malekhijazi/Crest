@@ -42,10 +42,11 @@ struct BrowserNotice: Equatable, Hashable {
 
     // MARK: - Actions - Notices
 
+    /// What the window says once `filename` has finished downloading.
     static func downloadFinished(_ filename: String) -> BrowserNotice {
         BrowserNotice(
             message: String(localized: "Downloaded \(filename)"),
-            systemImage: "arrow.down.circle.fill"
+            systemImage: "checkmark.circle.fill"
         )
     }
 
