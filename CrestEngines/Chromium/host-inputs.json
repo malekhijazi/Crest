@@ -498,5 +498,13 @@
   "chrome/browser/webauthn/chrome_web_authentication_delegate.cc": {
     "before": "6027d0e3e08eb1b83fc59759aa8f4a6789cbb2364ff83867ead42e2809828775",
     "after": "a465a00187a1bc795354ce3459c6b5c48e392404079bd37db0720883a0924fe4"
+  },
+  "content/app_shim_remote_cocoa/web_contents_view_cocoa.mm": {
+    "before": "21dcbb23c547fff01e212ec2f7ac972fe1dbd04a37fd1860fdb7b42605279d05",
+    "after": "f4856b42f74ac99658f8c7b2c33c3417f86ee907eb89b63400d4fe7ec7317f22"
+  },
+  "content/browser/web_contents/web_drag_dest_mac.mm": {
+    "before": "72f4f9a0a9e2b1f79db6ad962cfad2cdff893285d6c1dcdf0cd2de1a2e6094f2",
+    "after": "011e4d26c59b8fc5fddcad26da33a98e4e6edf1c62043bc9ec29a9921f601e51"
   }
 }

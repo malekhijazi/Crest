@@ -3348,3 +3348,66 @@
                  // The enclave won't allow credentials for an account to be
                  // stored in GPM _in_ that account. So we don't want to tell
                  // accounts.google.com that there is a platform authenticator
+--- a/content/app_shim_remote_cocoa/web_contents_view_cocoa.mm
++++ b/content/app_shim_remote_cocoa/web_contents_view_cocoa.mm
+@@ -242,7 +242,15 @@
+                         image:(NSImage*)image
+                        offset:(NSPoint)offset
+                  isPrivileged:(BOOL)isPrivileged {
+-  if (!_host || !ui::IsDragSessionInitiationAllowed()) {
++  if (!_host) {
++    return;
++  }
++  // Crest: a refused session ends the page's drag as a cancelled one. The
++  // page ignores input until the drag it began ends, so returning without
++  // ending it would leave the page unusable until it reloads.
++  if (!ui::IsDragSessionInitiationAllowed()) {
++    [self endDragAtScreenPoint:NSEvent.mouseLocation
++                     operation:NSDragOperationNone];
+     return;
+   }
+ 
+@@ -340,7 +348,17 @@
+   if (!_host) {
+     return;
+   }
++
++  [self endDragAtScreenPoint:screenPoint operation:operation];
++
++  // The drag is complete. Disconnect the drag source.
++  [_dragSource webContentsIsGone];
++  _dragSource = nil;
++}
+ 
++// Tells the host the drag this view started ended at `screenPoint`.
++- (void)endDragAtScreenPoint:(NSPoint)screenPoint
++                   operation:(NSDragOperation)operation {
+   NSPoint localPoint = NSZeroPoint;
+   if (self.window) {
+     NSPoint basePoint = [self.window convertPointFromScreen:screenPoint];
+@@ -358,10 +376,6 @@
+       GetSanitizedFlippedPoint(screenPoint, screenFrame.size.height);
+ 
+   _host->EndDrag(operation, local_point_f, screen_point_f);
+-
+-  // The drag is complete. Disconnect the drag source.
+-  [_dragSource webContentsIsGone];
+-  _dragSource = nil;
+ }
+ 
+ // NSDraggingDestination methods
+--- a/content/browser/web_contents/web_drag_dest_mac.mm
++++ b/content/browser/web_contents/web_drag_dest_mac.mm
+@@ -212,9 +212,9 @@
+   ++_dragUpdatedSequenceNumber;
+   ++_dropSequenceNumber;
+ 
+-  // Release any pending endDrag closure without running it.
+-  // This is an abort/error path - we don't want to fire dragend events.
+-  std::ignore = _endDragRunner.Release();
++  // A pending endDrag closure means the drag this view started has ended,
++  // so it still runs: the page ignores input until its drag ends.
++  base::ScopedClosureRunner endDragRunner(std::move(_endDragRunner));
+ }
+ 
+ // Call to set whether or not we should allow the drop. Takes effect the
